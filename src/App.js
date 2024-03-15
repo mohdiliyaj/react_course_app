@@ -1,23 +1,49 @@
-import logo from './logo.svg';
 import './App.css';
+import "bootstrap/dist/css/bootstrap.min.css";
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import Navbar from './components/Navbar';
+import Filters from './components/Filters';
+import { filterData, apiUrl } from './data';
+import Spinner from './components/Spinner';
+import Cards from './components/Cards';
+
 
 function App() {
+
+  const [loader, setLoader] = useState(true);
+  const [allCourses, setAllCourses] = useState([]);
+
+  async function fetchData() {
+    setLoader(true);
+    try {
+      const result = await fetch(apiUrl);
+      const response = await result.json();
+      setAllCourses(response.data);
+    } catch {
+      toast.error("Error while fetching the data from the server")
+    }
+    setLoader(false);
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+
+  const [filter, setFilter] = useState('All');
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <div>
+        <Navbar />
+      </div>
+      <div>
+        <Filters filterData={filterData} setFilter={setFilter} />
+      </div>
+      <div>
+        {loader ? (<Spinner />) : (<Cards allCourses={allCourses} filter={filter}/>)}
+      </div>
     </div>
   );
 }
